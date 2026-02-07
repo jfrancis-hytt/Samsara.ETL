@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Samsara.ETL": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
