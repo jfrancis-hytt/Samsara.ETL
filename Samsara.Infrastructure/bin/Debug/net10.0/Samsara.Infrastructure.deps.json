@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Samsara.Infrastructure/1.0.0": {
+        "dependencies": {
+          "Samsara.Domain": "1.0.0"
+        },
+        "runtime": {
+          "Samsara.Infrastructure.dll": {}
+        }
+      },
+      "Samsara.Domain/1.0.0": {
+        "runtime": {
+          "Samsara.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Samsara.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Samsara.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

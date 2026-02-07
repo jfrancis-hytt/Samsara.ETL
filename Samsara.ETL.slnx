@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Domain/Samsara.Domain.csproj" />
+  <Project Path="Samsara.ETL/Samsara.ETL.csproj" />
+  <Project Path="Samsara.Infrastructure/Samsara.Infrastructure.csproj" />
+</Solution>
