@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Samsara.Domain/Samsara.Domain.csproj" Id="840429a0-98da-4249-91b4-8a96464f000f" />
+  <Project Path="Samsara.ETL/Samsara.ETL.csproj" />
+  <Project Path="Samsara.Infrastructure/Samsara.Infrastructure.csproj" />
+</Solution>
