@@ -17,8 +17,8 @@
   "libraries": {
     "Samsara.Domain/1.0.0": {
       "type": "project",
-      "path": "../Domain/Samsara.Domain.csproj",
-      "msbuildProject": "../Domain/Samsara.Domain.csproj"
+      "path": "../Samsara.Domain/Samsara.Domain.csproj",
+      "msbuildProject": "../Samsara.Domain/Samsara.Domain.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -27,23 +27,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\jfrancis\\.nuget\\packages\\": {},
+    "C:\\Users\\Work\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jfrancis\\source\\repos\\JF_Playground\\Samsara.ETL\\Samsara.Infrastructure\\Samsara.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\Work\\source\\repos\\_HT\\Samsara.ETL\\Samsara.Infrastructure\\Samsara.Infrastructure.csproj",
       "projectName": "Samsara.Infrastructure",
-      "projectPath": "C:\\Users\\jfrancis\\source\\repos\\JF_Playground\\Samsara.ETL\\Samsara.Infrastructure\\Samsara.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\jfrancis\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jfrancis\\source\\repos\\JF_Playground\\Samsara.ETL\\Samsara.Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\Work\\source\\repos\\_HT\\Samsara.ETL\\Samsara.Infrastructure\\Samsara.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\Work\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Work\\source\\repos\\_HT\\Samsara.ETL\\Samsara.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\jfrancis\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Work\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -52,15 +52,15 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://pkgs.dev.azure.com/HighwayTransport/Development/_packaging/HYTT-Library/nuget/v3/index.json": {}
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\jfrancis\\source\\repos\\JF_Playground\\Samsara.ETL\\Domain\\Samsara.Domain.csproj": {
-              "projectPath": "C:\\Users\\jfrancis\\source\\repos\\JF_Playground\\Samsara.ETL\\Domain\\Samsara.Domain.csproj"
+            "C:\\Users\\Work\\source\\repos\\_HT\\Samsara.ETL\\Samsara.Domain\\Samsara.Domain.csproj": {
+              "projectPath": "C:\\Users\\Work\\source\\repos\\_HT\\Samsara.ETL\\Samsara.Domain\\Samsara.Domain.csproj"
             }
           }
         }
