@@ -8,11 +8,12 @@ namespace Samsara.ETL.Extensions;
 
 public static class ClientExtensions
 {
-    public static HostApplicationBuilder AddSamsaraClient(
-        this HostApplicationBuilder builder,
-        Action<SamsaraOptions> configureOptions)
+    public static HostApplicationBuilder AddSamsaraClient(this HostApplicationBuilder builder)
     {
-        builder.Services.Configure(configureOptions);
+        builder.Services.AddOptions<SamsaraOptions>()
+          .Bind(builder.Configuration.GetSection("Samsara"))
+          .ValidateDataAnnotations()
+          .ValidateOnStart();
 
         builder.Services.AddHttpClient<ISamsaraClient, SamsaraClient>((serviceProvider, httpClient) =>
         {

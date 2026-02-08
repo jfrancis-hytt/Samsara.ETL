@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Samsara.ETL.Extensions;
 using Samsara.ETL.Features.GatewaySync;
@@ -9,10 +8,7 @@ using Samsara.ETL.Features.TrailerSync;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.AddSamsaraClient(options =>
-{
-    builder.Configuration.GetSection("Samsara").Bind(options);
-});
+builder.AddSamsaraClient();
 
 builder.Services.AddServices();
 
