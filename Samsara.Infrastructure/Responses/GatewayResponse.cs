@@ -3,7 +3,7 @@
 namespace Samsara.Infrastructure.Responses;
 
 public record GatewayResponse(
-    [property: JsonPropertyName("data")] List<Gateway> Data,
+    [property: JsonPropertyName("data")] IReadOnlyList<Gateway> Data,
     [property: JsonPropertyName("pagination")] PaginationInfo Pagination
 );
 

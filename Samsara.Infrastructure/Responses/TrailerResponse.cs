@@ -3,7 +3,7 @@
 namespace Samsara.Infrastructure.Responses;
 
 public record TrailerResponse(
-    [property: JsonPropertyName("data")] List<Trailer> Data,
+    [property: JsonPropertyName("data")] IReadOnlyList<Trailer> Data,
     [property: JsonPropertyName("pagination")] PaginationInfo Pagination
 );
 

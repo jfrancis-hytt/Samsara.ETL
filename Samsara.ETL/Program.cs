@@ -18,7 +18,10 @@ builder.Services.AddServices();
 
 var host = builder.Build();
 
-// Run the job once
+var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+var ct = lifetime.ApplicationStopping;
+
+// Test Jobs
 using (var scope = host.Services.CreateScope())
 {
     var job1 = scope.ServiceProvider.GetRequiredService<TrailerSyncJob>();
@@ -27,10 +30,10 @@ using (var scope = host.Services.CreateScope())
     var job4 = scope.ServiceProvider.GetRequiredService<SensorTemperatureSyncJob>();
 
     await Task.WhenAll(
-        job1.ExecuteAsync(),
-        job2.ExecuteAsync(),
-        job3.ExecuteAsync(),
-        job4.ExecuteAsync()
+        job1.ExecuteAsync(ct),
+        job2.ExecuteAsync(ct),
+        job3.ExecuteAsync(ct),
+        job4.ExecuteAsync(ct)
     );
 
 }
