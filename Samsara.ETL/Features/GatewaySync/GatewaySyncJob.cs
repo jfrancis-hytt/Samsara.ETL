@@ -17,11 +17,11 @@ public class GatewaySyncJob
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
-        _logger.LogInformation("Starting sensor sync");
+        _logger.LogInformation("Starting Gateway sync");
 
         var gateways = await _service.SyncGatewaysAsync(ct);
 
-        _logger.LogInformation("Synced {Count} sensors:", gateways.Count);
+        _logger.LogInformation("Synced {Count} Gateways:", gateways.Count);
 
         foreach (var gateway in gateways)
         {

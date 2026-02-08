@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Samsara.Infrastructure.Client;
-using Samsara.Infrastructure.Samsara;
+using Samsara.Infrastructure.Options;
 
 namespace Samsara.ETL.Extensions;
 

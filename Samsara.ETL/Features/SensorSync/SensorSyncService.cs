@@ -1,5 +1,4 @@
 ﻿using Samsara.Infrastructure.Client;
-using Samsara.Infrastructure.Responses;
 
 namespace Samsara.ETL.Features.SensorSync;
 
@@ -26,4 +25,6 @@ public class SensorSyncService
 
         return sensorDtos;
     }
+
+    
 }

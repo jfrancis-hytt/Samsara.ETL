@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Samsara.ETL.Features.GatewaySync;
+﻿namespace Samsara.ETL.Features.GatewaySync;
 
 public record GatewayDto(
     string Serial,

@@ -1,4 +1,4 @@
-﻿namespace Samsara.Infrastructure.Samsara;
+﻿namespace Samsara.Infrastructure.Options;
 
 public class SamsaraOptions
 {

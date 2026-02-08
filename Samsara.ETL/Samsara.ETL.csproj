@@ -5,14 +5,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>b3931365-a048-4605-b90b-09634e024966</UserSecretsId>
-	  
+    <UserSecretsId>b3931365-a048-4605-b90b-09634e024966</UserSecretsId>	  
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Common\Interfaces\" />
-    <Folder Include="Features\Common\Notifications\" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
