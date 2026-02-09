@@ -2,7 +2,7 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
-using Samsara.Domain.Repositories;
+using Samsara.Domain.Interfaces.Repositories;
 
 namespace Samsara.Infrastructure.Repositories;
 

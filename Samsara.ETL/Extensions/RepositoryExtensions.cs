@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Samsara.Domain.Repositories;
+using Samsara.Domain.Interfaces.Repositories;
 using Samsara.Infrastructure.Repositories;
 
 namespace Samsara.ETL.Extensions;

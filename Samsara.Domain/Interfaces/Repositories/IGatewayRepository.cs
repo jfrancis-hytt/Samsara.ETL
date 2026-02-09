@@ -1,6 +1,6 @@
 using Samsara.Domain.Entities;
 
-namespace Samsara.Domain.Repositories;
+namespace Samsara.Domain.Interfaces.Repositories;
 
 public interface IGatewayRepository
 {

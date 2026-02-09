@@ -1,5 +1,5 @@
 using Samsara.Domain.Entities;
-using Samsara.Domain.Repositories;
+using Samsara.Domain.Interfaces.Repositories;
 using Samsara.Infrastructure.Dtos;
 using Samsara.Infrastructure.Samsara.Client;
 
