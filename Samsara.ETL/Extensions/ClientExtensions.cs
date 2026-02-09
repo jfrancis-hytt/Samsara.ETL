@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Samsara.Infrastructure.Client;
-using Samsara.Infrastructure.Options;
+using Samsara.Infrastructure.Samsara.Client;
+using Samsara.Infrastructure.Samsara.Options;
 
 namespace Samsara.ETL.Extensions;
 

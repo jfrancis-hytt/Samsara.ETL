@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Samsara.ETL.Features.GatewaySync;
-using Samsara.ETL.Features.SensorSync;
-using Samsara.ETL.Features.SensorTemperatureSync;
-using Samsara.ETL.Features.TrailerSync;
+using Samsara.ETL.Pipelines.Gateway;
+using Samsara.ETL.Pipelines.Sensor;
+using Samsara.ETL.Pipelines.SensorTemperature;
+using Samsara.ETL.Pipelines.Trailer;
+using Samsara.Infrastructure.Services;
 
 namespace Samsara.ETL.Extensions;
 
@@ -12,20 +13,20 @@ public static class ServiceExtensions
     {
 
         // Sensors
-        services.AddScoped<SensorSyncService>();
-        services.AddScoped<SensorSyncJob>();
+        services.AddScoped<SensorService>();
+        services.AddScoped<SensorJob>();
 
         // Sensor Temps
-        services.AddScoped<SensorTemperatureSyncService>();
+        services.AddScoped<SensorTemperatureService>();
         services.AddScoped<SensorTemperatureSyncJob>();
 
         // Gateways
-        services.AddScoped<GatewaySyncService>();
-        services.AddScoped<GatewaySyncJob>();
+        services.AddScoped<GatewayService>();
+        services.AddScoped<GatewayJob>();
 
         // Trailers
-        services.AddScoped<TrailerSyncService>();
-        services.AddScoped<TrailerSyncJob>();
+        services.AddScoped<TrailerService>();
+        services.AddScoped<TrailerJob>();
 
     }
 }

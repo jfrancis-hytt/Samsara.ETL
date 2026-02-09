@@ -1,16 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Samsara.ETL.Extensions;
-using Samsara.ETL.Features.GatewaySync;
-using Samsara.ETL.Features.SensorSync;
-using Samsara.ETL.Features.SensorTemperatureSync;
-using Samsara.ETL.Features.TrailerSync;
+using Samsara.ETL.Pipelines.Gateway;
+using Samsara.ETL.Pipelines.Sensor;
+using Samsara.ETL.Pipelines.SensorTemperature;
+using Samsara.ETL.Pipelines.Trailer;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddSamsaraClient();
 
 builder.Services.AddServices();
+builder.Services.AddRepositories();
 
 var host = builder.Build();
 
@@ -20,16 +21,19 @@ var ct = lifetime.ApplicationStopping;
 // Test Jobs
 using (var scope = host.Services.CreateScope())
 {
-    var job1 = scope.ServiceProvider.GetRequiredService<TrailerSyncJob>();
-    var job2 = scope.ServiceProvider.GetRequiredService<SensorSyncJob>();
-    var job3 = scope.ServiceProvider.GetRequiredService<GatewaySyncJob>();
+    var job1 = scope.ServiceProvider.GetRequiredService<TrailerJob>();
+    var job2 = scope.ServiceProvider.GetRequiredService<SensorJob>();
+    var job3 = scope.ServiceProvider.GetRequiredService<GatewayJob>();
     var job4 = scope.ServiceProvider.GetRequiredService<SensorTemperatureSyncJob>();
 
+    // Run parent table jobs first (can run in parallel)
     await Task.WhenAll(
         job1.ExecuteAsync(ct),
         job2.ExecuteAsync(ct),
-        job3.ExecuteAsync(ct),
-        job4.ExecuteAsync(ct)
+        job3.ExecuteAsync(ct)
     );
+
+    // Run dependent jobs after parents are populated
+    await job4.ExecuteAsync(ct);
 
 }
