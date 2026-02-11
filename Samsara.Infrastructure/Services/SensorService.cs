@@ -26,16 +26,13 @@ public class SensorService
             MacAddress: s.MacAddress ?? string.Empty
         )).ToList();
 
-        foreach (var dto in sensorDtos)
+        var entities = sensorDtos.Select(dto => new SensorEntity
         {
-            var entity = new Sensor
-            {
-                SensorId = dto.SensorId,
-                Name = dto.Name,
-                MacAddress = dto.MacAddress
-            };
-            await _sensorRepository.UpsertAsync(entity);
-        }
+            SensorId = dto.SensorId,
+            Name = dto.Name,
+            MacAddress = dto.MacAddress
+        });
+        await _sensorRepository.UpsertBatchAsync(entities);
 
         return sensorDtos;
     }

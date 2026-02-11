@@ -21,19 +21,9 @@ public sealed class SamsaraClient : ISamsaraClient
     /// <returns></returns>
     public async Task<SensorResponse> GetSensorsAsync(CancellationToken ct = default)
     {
-        //var response = await _httpClient.GetFromJsonAsync<SensorResponse>(
-        //    "/v1/sensors/list", ct);
+        using var response = await _httpClient.GetAsync("/v1/sensors/list",ct);
 
-        //return response ?? new SensorResponse([]);
-
-        var response = await _httpClient.GetAsync("/v1/sensors/list",ct);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException(
-                $"Sensors request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
-        }
+        await EnsureSuccess(response, "Sensors", ct);
 
         var result = await response.Content.ReadFromJsonAsync<SensorResponse>(ct);
         return result ?? new SensorResponse([]);
@@ -48,35 +38,11 @@ public sealed class SamsaraClient : ISamsaraClient
     /// <returns><see cref="GatewayResponse"/></returns>
     public async Task<GatewayResponse> GetGatewaysAsync(CancellationToken ct = default)
     {
-        var allGatewayData = new List<Gateway>(); // The entire set of data from all pagination requests
-        string? hasMorePages = null; // Used to see if there are more pages in the request
-
-        do
-        {
-            var url = hasMorePages is null ? "/gateways" : $"/gateways?after={hasMorePages}";
-            var response = await _httpClient.GetAsync(url,ct);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorBody = await response.Content.ReadAsStringAsync(ct);
-                throw new HttpRequestException(
-                    $"Gateways request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
-            }
-
-            var result = await response.Content.ReadFromJsonAsync<GatewayResponse>(ct);
-
-            if (result is null) // Break out because there are no more pages
-                break;
-
-            allGatewayData.AddRange(result.Data); // Add every gateway object
-
-            hasMorePages = result.Pagination.HasNextPage ? result.Pagination.EndCursor : null; // Check if there are more pages and assign for next request. 
-
-        } while (hasMorePages != null);
-
-
-        return new GatewayResponse(allGatewayData, new PaginationInfo(string.Empty, false));
+        var data = await PaginateAsync<GatewayResponse, Gateway>(
+            "/gateways", r => r.Data, r => r.Pagination, "Gateways", ct);
+        return new GatewayResponse(data, new PaginationInfo(string.Empty, false));
     }
+
 
     /// <summary>
     /// This endpoint returns a list of all trailers that are currently registered in the Samsara system.
@@ -86,24 +52,9 @@ public sealed class SamsaraClient : ISamsaraClient
     /// <returns><see cref="TrailerResponse"/></returns>
     public async Task<TrailerResponse> GetTrailersAsync(CancellationToken ct = default)
     {
-        //var response = await _httpClient.GetFromJsonAsync<TrailerResponse>(
-        //    "/fleet/trailers", ct);
-
-        var response = await _httpClient.GetAsync("/fleet/trailers", ct);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException(
-                $"Trailers request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
-        }
-
-        var result = await response.Content.ReadFromJsonAsync<TrailerResponse>(ct);
-        return result ?? new TrailerResponse(
-            [],
-            new PaginationInfo(string.Empty, false)
-        );
-
+        var data = await PaginateAsync<TrailerResponse, Trailer>(
+            "/fleet/trailers", r => r.Data, r => r.Pagination, "Trailers", ct);
+        return new TrailerResponse(data, new PaginationInfo(string.Empty, false));
     }
 
     /// <summary>
@@ -116,14 +67,9 @@ public sealed class SamsaraClient : ISamsaraClient
     public async Task<SensorTemperatureResponse> GetSensorTemperaturesAsync(List<long> sensorIds, CancellationToken ct = default)
     {
         var request = new SensorTemperatureRequest(sensorIds);
-        var response = await _httpClient.PostAsJsonAsync("/v1/sensors/temperature", request, ct);
+        using var response = await _httpClient.PostAsJsonAsync("/v1/sensors/temperature", request, ct);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            var errorBody = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException(
-                $"Sensor temperature request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
-        }
+        await EnsureSuccess(response, "Sensor temperature", ct);
 
         var result = await response.Content.ReadFromJsonAsync<SensorTemperatureResponse>(ct);
         return result ?? new SensorTemperatureResponse(0, []);
@@ -138,16 +84,50 @@ public sealed class SamsaraClient : ISamsaraClient
     /// <returns><see cref="SensorHistoryResponse"/></returns>
     public async Task<SensorHistoryResponse> GetSensorHistoryAsync(SensorHistoryRequest request, CancellationToken ct = default)
     {
-        var response = await _httpClient.PostAsJsonAsync("/v1/sensors/history", request, ct);
+        using var response = await _httpClient.PostAsJsonAsync("/v1/sensors/history", request, ct);
 
+        await EnsureSuccess(response, "Sensor history", ct);
+
+        var result = await response.Content.ReadFromJsonAsync<SensorHistoryResponse>(ct);
+        return result ?? new SensorHistoryResponse([]);
+    }
+
+
+    private async Task<List<TItem>> PaginateAsync<TResponse, TItem>(
+        string baseUrl,
+        Func<TResponse, IReadOnlyList<TItem>> getData,
+        Func<TResponse, PaginationInfo> getPagination,
+        string errorLabel,
+        CancellationToken ct)
+    {
+        var all = new List<TItem>();
+        string? cursor = null;
+
+        do
+        {
+            var url = cursor is null ? baseUrl : $"{baseUrl}?after={cursor}";
+            using var response = await _httpClient.GetAsync(url, ct);
+            await EnsureSuccess(response, errorLabel, ct);
+
+            var result = await response.Content.ReadFromJsonAsync<TResponse>(ct);
+            if (result is null) break;
+
+            all.AddRange(getData(result));
+            var pagination = getPagination(result);
+            cursor = pagination.HasNextPage ? pagination.EndCursor : null;
+        } while (cursor != null);
+
+        return all;
+    }
+
+
+    private static async Task EnsureSuccess(HttpResponseMessage response, string label, CancellationToken ct)
+    {
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync(ct);
             throw new HttpRequestException(
-                $"Sensor history request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
+                $"{label} request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
         }
-
-        var result = await response.Content.ReadFromJsonAsync<SensorHistoryResponse>(ct);
-        return result ?? new SensorHistoryResponse([]);
     }
 }

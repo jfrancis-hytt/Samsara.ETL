@@ -28,7 +28,7 @@ public class TrailerJob
 
             foreach (var trailer in trailers)
             {
-                _logger.LogInformation(
+                _logger.LogDebug(
                     "Trailer: {Id} - {Name} - Gateway: {GatewaySerial} - License: {LicensePlate}",
                     trailer.Id,
                     trailer.Name,

@@ -32,20 +32,17 @@ public class SensorTemperatureService
             TrailerId: s.TrailerId
         )).ToList();
 
-        foreach (var dto in temperatureDtos)
+        var entities = temperatureDtos.Select(dto => new SensorTemperatureReadingEntity
         {
-            var entity = new SensorTemperatureReading
-            {
-                SensorId = dto.SensorId,
-                Name = dto.Name,
-                AmbientTemperature = dto.AmbientTemperature,
-                AmbientTemperatureTime = dto.AmbientTemperatureTime,
-                ProbeTemperature = dto.ProbeTemperature,
-                ProbeTemperatureTime = dto.ProbeTemperatureTime,
-                TrailerId = dto.TrailerId
-            };
-            await _sensorTemperatureReadingRepository.InsertAsync(entity);
-        }
+            SensorId = dto.SensorId,
+            Name = dto.Name,
+            AmbientTemperature = dto.AmbientTemperature,
+            AmbientTemperatureTime = dto.AmbientTemperatureTime,
+            ProbeTemperature = dto.ProbeTemperature,
+            ProbeTemperatureTime = dto.ProbeTemperatureTime,
+            TrailerId = dto.TrailerId
+        });
+        await _sensorTemperatureReadingRepository.InsertBatchAsync(entities);
 
         return temperatureDtos;
     }

@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,25 +6,35 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class SensorTemperatureReadingRepository : ISensorTemperatureReadingRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public SensorTemperatureReadingRepository(IConfiguration configuration)
+    public SensorTemperatureReadingRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task InsertAsync(SensorTemperatureReading reading)
+    public async Task InsertBatchAsync(IEnumerable<SensorTemperatureReadingEntity> readings)
     {
+        // DateTimeKeys are using 112 style here is a link for reference: https://learn.microsoft.com/en-us/sql/t-sql/functions/cast-and-convert-transact-sql?view=sql-server-ver17
         const string sql = """
-            INSERT INTO [dbo].[SensorTemperatureReadings]
+            INSERT INTO dbo.SensorTemperatureReadings
                 (SensorId, Name, AmbientTemperature, AmbientTemperatureTime,
                  ProbeTemperature, ProbeTemperatureTime, TrailerId, CreatedAt)
-            VALUES
-                (@SensorId, @Name, @AmbientTemperature, @AmbientTemperatureTime,
-                 @ProbeTemperature, @ProbeTemperatureTime, @TrailerId, GETUTCDATE())
+            SELECT
+                @SensorId, @Name, @AmbientTemperature, @AmbientTemperatureTime,
+                @ProbeTemperature, @ProbeTemperatureTime, @TrailerId, SYSUTCDATETIME()
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM dbo.SensorTemperatureReadings t
+                WHERE t.SensorId = @SensorId
+                  AND t.AmbientTimeKey = ISNULL(@AmbientTemperatureTime, CONVERT(datetime2(0), '19000101', 112))
+                  AND t.ProbeTimeKey   = ISNULL(@ProbeTemperatureTime,   CONVERT(datetime2(0), '19000101', 112))
+                  AND t.TrailerIdKey   = ISNULL(@TrailerId, -1)
+            );
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(sql, reading);
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.OpenAsync();
+        await connection.ExecuteAsync(sql, readings);
     }
 }

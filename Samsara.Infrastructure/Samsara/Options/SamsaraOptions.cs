@@ -2,7 +2,7 @@
 
 namespace Samsara.Infrastructure.Samsara.Options;
 
-public class SamsaraOptions
+public sealed class SamsaraOptions
 {
     [Required]
     public string BaseUrl { get; set; } = string.Empty;

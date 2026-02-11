@@ -42,31 +42,29 @@ public class TrailerService
             )).ToList()
         )).ToList();
 
-        foreach (var dto in trailerDtos)
+        var entities = trailerDtos.Select(dto => new TrailerEntity
         {
-            var entity = new Trailer
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                GatewaySerial = dto.GatewaySerial,
-                GatewayModel = dto.GatewayModel,
-                SamsaraSerial = dto.SamsaraSerial,
-                SamsaraVin = dto.SamsaraVin,
-                LicensePlate = dto.LicensePlate,
-                Notes = dto.Notes,
-                EnabledForMobile = dto.EnabledForMobile
-            };
-            await _trailerRepository.UpsertAsync(entity);
+            Id = dto.Id,
+            Name = dto.Name,
+            GatewaySerial = dto.GatewaySerial,
+            GatewayModel = dto.GatewayModel,
+            SamsaraSerial = dto.SamsaraSerial,
+            SamsaraVin = dto.SamsaraVin,
+            LicensePlate = dto.LicensePlate,
+            Notes = dto.Notes,
+            EnabledForMobile = dto.EnabledForMobile
+        });
+        await _trailerRepository.UpsertBatchAsync(entities);
 
-            var tags = dto.Tags?.Select(t => new TrailerTag
+        var allTags = trailerDtos.SelectMany(dto =>
+            dto.Tags?.Select(t => new TrailerTagEntity
             {
                 Id = t.Id,
                 Name = t.Name,
                 ParentTagId = t.ParentTagId,
                 TrailerId = dto.Id
-            }) ?? [];
-            await _trailerTagRepository.ReplaceByTrailerAsync(dto.Id, tags);
-        }
+            }) ?? []);
+        await _trailerTagRepository.ReplaceAllAsync(allTags);
 
         return trailerDtos;
     }

@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,25 +6,25 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class TrailerTagRepository : ITrailerTagRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public TrailerTagRepository(IConfiguration configuration)
+    public TrailerTagRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task ReplaceByTrailerAsync(string trailerId, IEnumerable<TrailerTag> tags)
+    public async Task ReplaceAllAsync(IEnumerable<TrailerTagEntity> tags)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
-        const string deleteSql = "DELETE FROM [dbo].[TrailerTags] WHERE TrailerId = @TrailerId";
-        await connection.ExecuteAsync(deleteSql, new { TrailerId = trailerId }, transaction);
+        const string deleteSql = "DELETE FROM [dbo].[TrailerTags]";
+        await connection.ExecuteAsync(deleteSql, transaction: transaction);
 
         const string insertSql = """
             INSERT INTO [dbo].[TrailerTags] (Id, Name, ParentTagId, TrailerId, CreatedAt, UpdatedAt)
-            VALUES (@Id, @Name, @ParentTagId, @TrailerId, GETUTCDATE(), GETUTCDATE())
+            VALUES (@Id, @Name, @ParentTagId, @TrailerId, SYSUTCDATETIME(), SYSUTCDATETIME())
             """;
         await connection.ExecuteAsync(insertSql, tags, transaction);
 

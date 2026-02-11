@@ -36,6 +36,12 @@ public class SensorHistoryJob
             var sensors = await _sensorRepository.GetAllAsync();
             var sensorIds = sensors.Select(s => s.SensorId).ToList();
 
+            if (sensorIds.Count == 0)
+            {
+                _logger.LogWarning("No sensors found in database — skipping history sync");
+                return;
+            }
+
             // Calculate time range
             var now = DateTimeOffset.UtcNow;
             var endMs = now.ToUnixTimeMilliseconds();

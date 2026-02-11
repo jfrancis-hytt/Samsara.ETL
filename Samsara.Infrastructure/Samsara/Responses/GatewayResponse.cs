@@ -42,8 +42,3 @@ public record AccessoryDevice(
     [property: JsonPropertyName("serial")] string? Serial,
     [property: JsonPropertyName("model")] string? Model
 );
-
-public record PaginationInfo(
-    [property: JsonPropertyName("endCursor")] string EndCursor,
-    [property: JsonPropertyName("hasNextPage")] bool HasNextPage
-);

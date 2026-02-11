@@ -1,6 +1,6 @@
 namespace Samsara.Domain.Entities;
 
-public class AccessoryDevice
+public class AccessoryDeviceEntity
 {
     public string Serial { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;

@@ -30,6 +30,12 @@ public class SensorTemperatureJob
             var sensors = await _repository.GetAllAsync();
             var sensorIds = sensors.Select(s => s.SensorId).ToList();
 
+            if (sensorIds.Count == 0)
+            {
+                _logger.LogWarning("No sensors found in database — skipping temperature sync");
+                return;
+            }
+
             // Inject sensorIds into service
             var temperatures = await _service.SyncSensorTemperaturesAsync(sensorIds, ct);
 
@@ -37,7 +43,7 @@ public class SensorTemperatureJob
 
             foreach (var temp in temperatures)
             {
-                _logger.LogInformation("Temperature: {Id} - {Name} - Ambient: {Ambient} - Probe: {Probe}",
+                _logger.LogDebug("Temperature: {Id} - {Name} - Ambient: {Ambient} - Probe: {Probe}",
                     temp.SensorId, temp.Name, temp.AmbientTemperature, temp.ProbeTemperature);
             }
         }

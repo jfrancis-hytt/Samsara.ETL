@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,14 +6,14 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class GatewayRepository : IGatewayRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public GatewayRepository(IConfiguration configuration)
+    public GatewayRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task UpsertAsync(Gateway gateway)
+    public async Task UpsertBatchAsync(IEnumerable<GatewayEntity> gateways)
     {
         const string sql = """
             MERGE INTO [dbo].[Gateways] AS target
@@ -31,19 +29,20 @@ public class GatewayRepository : IGatewayRepository
                     LastConnected = @LastConnected,
                     CellularDataUsageBytes = @CellularDataUsageBytes,
                     HotspotUsageBytes = @HotspotUsageBytes,
-                    UpdatedAt = GETUTCDATE()
+                    UpdatedAt = SYSUTCDATETIME()
             WHEN NOT MATCHED THEN
                 INSERT (Serial, Model, AssetId, SamsaraSerial, SamsaraVin, HealthStatus,
                         LastConnected, CellularDataUsageBytes, HotspotUsageBytes, CreatedAt, UpdatedAt)
                 VALUES (@Serial, @Model, @AssetId, @SamsaraSerial, @SamsaraVin, @HealthStatus,
-                        @LastConnected, @CellularDataUsageBytes, @HotspotUsageBytes, GETUTCDATE(), GETUTCDATE());
+                        @LastConnected, @CellularDataUsageBytes, @HotspotUsageBytes, SYSUTCDATETIME(), SYSUTCDATETIME());
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(sql, gateway);
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.OpenAsync();
+        await connection.ExecuteAsync(sql, gateways);
     }
 
-    public async Task<IReadOnlyList<Gateway>> GetAllAsync()
+    public async Task<IReadOnlyList<GatewayEntity>> GetAllAsync()
     {
         const string sql = """
             SELECT Serial, Model, AssetId, SamsaraSerial, SamsaraVin, HealthStatus,
@@ -51,8 +50,8 @@ public class GatewayRepository : IGatewayRepository
             FROM [dbo].[Gateways]
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        var results = await connection.QueryAsync<Gateway>(sql);
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<GatewayEntity>(sql);
         return results.ToList();
     }
 }

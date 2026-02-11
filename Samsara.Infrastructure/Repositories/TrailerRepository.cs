@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,14 +6,14 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class TrailerRepository : ITrailerRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public TrailerRepository(IConfiguration configuration)
+    public TrailerRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task UpsertAsync(Trailer trailer)
+    public async Task UpsertBatchAsync(IEnumerable<TrailerEntity> trailers)
     {
         const string sql = """
             MERGE INTO [dbo].[Trailers] AS target
@@ -31,19 +29,20 @@ public class TrailerRepository : ITrailerRepository
                     LicensePlate = @LicensePlate,
                     Notes = @Notes,
                     EnabledForMobile = @EnabledForMobile,
-                    UpdatedAt = GETUTCDATE()
+                    UpdatedAt = SYSUTCDATETIME()
             WHEN NOT MATCHED THEN
                 INSERT (Id, Name, GatewaySerial, GatewayModel, SamsaraSerial, SamsaraVin,
                         LicensePlate, Notes, EnabledForMobile, CreatedAt, UpdatedAt)
                 VALUES (@Id, @Name, @GatewaySerial, @GatewayModel, @SamsaraSerial, @SamsaraVin,
-                        @LicensePlate, @Notes, @EnabledForMobile, GETUTCDATE(), GETUTCDATE());
+                        @LicensePlate, @Notes, @EnabledForMobile, SYSUTCDATETIME(), SYSUTCDATETIME());
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(sql, trailer);
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.OpenAsync();
+        await connection.ExecuteAsync(sql, trailers);
     }
 
-    public async Task<IReadOnlyList<Trailer>> GetAllAsync()
+    public async Task<IReadOnlyList<TrailerEntity>> GetAllAsync()
     {
         const string sql = """
             SELECT Id, Name, GatewaySerial, GatewayModel, SamsaraSerial, SamsaraVin,
@@ -51,8 +50,8 @@ public class TrailerRepository : ITrailerRepository
             FROM [dbo].[Trailers]
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        var results = await connection.QueryAsync<Trailer>(sql);
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<TrailerEntity>(sql);
         return results.ToList();
     }
 }

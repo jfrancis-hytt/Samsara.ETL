@@ -4,6 +4,6 @@ namespace Samsara.Domain.Interfaces.Repositories;
 
 public interface ISensorRepository
 {
-    Task UpsertAsync(Sensor sensor);
-    Task<IReadOnlyList<Sensor>> GetAllAsync();
+    Task UpsertBatchAsync(IEnumerable<SensorEntity> sensors);
+    Task<IReadOnlyList<SensorEntity>> GetAllAsync();
 }

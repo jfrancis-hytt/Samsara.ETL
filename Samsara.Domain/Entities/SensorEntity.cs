@@ -1,6 +1,6 @@
 namespace Samsara.Domain.Entities;
 
-public class Sensor
+public class SensorEntity
 {
     public long SensorId { get; set; }
     public string Name { get; set; } = string.Empty;

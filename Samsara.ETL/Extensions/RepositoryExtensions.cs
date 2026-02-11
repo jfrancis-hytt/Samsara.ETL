@@ -8,6 +8,8 @@ public static class RepositoryExtensions
 {
     public static void AddRepositories(this IServiceCollection services)
     {
+        services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
+
         services.AddScoped<ISensorRepository, SensorRepository>();
         services.AddScoped<IGatewayRepository, GatewayRepository>();
         services.AddScoped<IAccessoryDeviceRepository, AccessoryDeviceRepository>();

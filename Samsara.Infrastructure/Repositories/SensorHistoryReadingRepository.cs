@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,36 +6,28 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class SensorHistoryReadingRepository : ISensorHistoryReadingRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public SensorHistoryReadingRepository(IConfiguration configuration)
+    public SensorHistoryReadingRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task InsertAsync(SensorHistoryReading reading)
+    public async Task InsertBatchAsync(IEnumerable<SensorHistoryReadingEntity> readings)
     {
         const string sql = """
             INSERT INTO [dbo].[SensorHistoryReadings]
                 (SensorId, TimeMs, ProbeTemperature, AmbientTemperature, CreatedAt)
-            VALUES
-                (@SensorId, @TimeMs, @ProbeTemperature, @AmbientTemperature, GETUTCDATE())
+            SELECT
+                @SensorId, @TimeMs, @ProbeTemperature, @AmbientTemperature, SYSUTCDATETIME()
+            WHERE NOT EXISTS (
+                SELECT 1 FROM [dbo].[SensorHistoryReadings]
+                WHERE SensorId = @SensorId
+                  AND TimeMs = @TimeMs
+            )
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(sql, reading);
-    }
-
-    public async Task InsertBatchAsync(IEnumerable<SensorHistoryReading> readings)
-    {
-        const string sql = """
-            INSERT INTO [dbo].[SensorHistoryReadings]
-                (SensorId, TimeMs, ProbeTemperature, AmbientTemperature, CreatedAt)
-            VALUES
-                (@SensorId, @TimeMs, @ProbeTemperature, @AmbientTemperature, GETUTCDATE())
-            """;
-
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync();
         await connection.ExecuteAsync(sql, readings);
     }

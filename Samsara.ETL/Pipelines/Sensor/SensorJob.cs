@@ -30,7 +30,7 @@ public class SensorJob
 
             foreach (var sensor in sensors)
             {
-                _logger.LogInformation("Sensor: {Id} - {Name} - {Mac}",
+                _logger.LogDebug("Sensor: {Id} - {Name} - {Mac}",
                     sensor.SensorId, sensor.Name, sensor.MacAddress);
             }
         }

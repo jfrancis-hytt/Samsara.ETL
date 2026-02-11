@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,14 +6,15 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class SensorRepository : ISensorRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public SensorRepository(IConfiguration configuration)
+    public SensorRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task UpsertAsync(Sensor sensor)
+
+    public async Task UpsertBatchAsync(IEnumerable<SensorEntity> sensors)
     {
         const string sql = """
             MERGE INTO [dbo].[Sensors] AS target
@@ -25,22 +24,23 @@ public class SensorRepository : ISensorRepository
                 UPDATE SET
                     Name = @Name,
                     MacAddress = @MacAddress,
-                    UpdatedAt = GETUTCDATE()
+                    UpdatedAt = SYSUTCDATETIME()
             WHEN NOT MATCHED THEN
                 INSERT (SensorId, Name, MacAddress, CreatedAt, UpdatedAt)
-                VALUES (@SensorId, @Name, @MacAddress, GETUTCDATE(), GETUTCDATE());
+                VALUES (@SensorId, @Name, @MacAddress, SYSUTCDATETIME(), SYSUTCDATETIME());
             """;
 
-        using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(sql, sensor);
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.OpenAsync();
+        await connection.ExecuteAsync(sql, sensors);
     }
 
-    public async Task<IReadOnlyList<Sensor>> GetAllAsync()
+    public async Task<IReadOnlyList<SensorEntity>> GetAllAsync()
     {
         const string sql = "SELECT SensorId, Name, MacAddress, CreatedAt, UpdatedAt FROM [dbo].[Sensors]";
 
-        using var connection = new SqlConnection(_connectionString);
-        var results = await connection.QueryAsync<Sensor>(sql);
+        using var connection = _connectionFactory.CreateConnection();
+        var results = await connection.QueryAsync<SensorEntity>(sql);
         return results.ToList();
     }
 }

@@ -1,6 +1,4 @@
 using Dapper;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 
@@ -8,25 +6,25 @@ namespace Samsara.Infrastructure.Repositories;
 
 public class AccessoryDeviceRepository : IAccessoryDeviceRepository
 {
-    private readonly string _connectionString;
+    private readonly IDbConnectionFactory _connectionFactory;
 
-    public AccessoryDeviceRepository(IConfiguration configuration)
+    public AccessoryDeviceRepository(IDbConnectionFactory connectionFactory)
     {
-        _connectionString = configuration.GetConnectionString("SamsaraDbConnectionString")!;
+        _connectionFactory = connectionFactory;
     }
 
-    public async Task ReplaceByGatewayAsync(string gatewaySerial, IEnumerable<AccessoryDevice> devices)
+    public async Task ReplaceAllAsync(IEnumerable<AccessoryDeviceEntity> devices)
     {
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
-        const string deleteSql = "DELETE FROM [dbo].[AccessoryDevices] WHERE GatewaySerial = @GatewaySerial";
-        await connection.ExecuteAsync(deleteSql, new { GatewaySerial = gatewaySerial }, transaction);
+        const string deleteSql = "DELETE FROM [dbo].[AccessoryDevices]";
+        await connection.ExecuteAsync(deleteSql, transaction: transaction);
 
         const string insertSql = """
             INSERT INTO [dbo].[AccessoryDevices] (Serial, Model, GatewaySerial, CreatedAt, UpdatedAt)
-            VALUES (@Serial, @Model, @GatewaySerial, GETUTCDATE(), GETUTCDATE())
+            VALUES (@Serial, @Model, @GatewaySerial, SYSUTCDATETIME(), SYSUTCDATETIME())
             """;
         await connection.ExecuteAsync(insertSql, devices, transaction);
 

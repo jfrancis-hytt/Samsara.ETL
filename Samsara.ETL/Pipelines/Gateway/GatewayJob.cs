@@ -30,7 +30,7 @@ public class GatewayJob
 
             foreach (var gateway in gateways)
             {
-                _logger.LogInformation(
+                _logger.LogDebug(
                    "Gateway: {Serial} - {Model} - Health: {HealthStatus} - Asset: {AssetId}",
                    gateway.Serial,
                    gateway.Model,

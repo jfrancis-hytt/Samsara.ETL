@@ -19,6 +19,8 @@ public class SensorHistoryService
         _sensorHistoryReadingRepository = sensorHistoryReadingRepository;
     }
 
+    private const int MaxConcurrency = 5;
+
     public async Task<List<SensorHistoryDto>> SyncSensorHistoryAsync(
         List<long> sensorIds,
         long startMs,
@@ -26,13 +28,25 @@ public class SensorHistoryService
         long stepMs,
         CancellationToken ct = default)
     {
-        // Fetch all sensors in parallel
-        var tasks = sensorIds.Select(sensorId => FetchSensorHistoryAsync(sensorId, startMs, endMs, stepMs, ct));
+        // Fetch sensors in parallel
+        using var semaphore = new SemaphoreSlim(MaxConcurrency);
+        var tasks = sensorIds.Select(async sensorId =>
+        {
+            await semaphore.WaitAsync(ct);
+            try
+            {
+                return await FetchSensorHistoryAsync(sensorId, startMs, endMs, stepMs, ct);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        });
         var results = await Task.WhenAll(tasks);
         var dtos = results.SelectMany(r => r).ToList();
 
         // Batch insert all readings at once
-        var entities = dtos.Select(dto => new SensorHistoryReading
+        var entities = dtos.Select(dto => new SensorHistoryReadingEntity
         {
             SensorId = dto.SensorId,
             TimeMs = dto.TimeMs,

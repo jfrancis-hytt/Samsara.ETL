@@ -1,6 +1,6 @@
 namespace Samsara.Domain.Entities;
 
-public class SensorHistoryReading
+public class SensorHistoryReadingEntity
 {
     public long Id { get; set; }
     public long SensorId { get; set; }

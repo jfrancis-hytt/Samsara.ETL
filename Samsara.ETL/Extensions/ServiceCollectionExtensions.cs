@@ -8,7 +8,7 @@ using Samsara.Infrastructure.Services;
 
 namespace Samsara.ETL.Extensions;
 
-public static class ServiceExtensions
+public static class ServiceCollectionExtensions
 {
     public static void AddServices(this IServiceCollection services)
     {
@@ -16,6 +16,10 @@ public static class ServiceExtensions
         // Sensors
         services.AddScoped<SensorService>();
         services.AddScoped<SensorJob>();
+
+        // Sensor History
+        services.AddScoped<SensorHistoryService>();
+        services.AddScoped<SensorHistoryJob>();
 
         // Sensor Temps
         services.AddScoped<SensorTemperatureService>();
@@ -28,10 +32,5 @@ public static class ServiceExtensions
         // Trailers
         services.AddScoped<TrailerService>();
         services.AddScoped<TrailerJob>();
-
-        // Sensor History
-        services.AddScoped<SensorHistoryService>();
-        services.AddScoped<SensorHistoryJob>();
-
     }
 }

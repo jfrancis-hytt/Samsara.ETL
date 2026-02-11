@@ -6,7 +6,6 @@ using Samsara.ETL.Pipelines.Sensor;
 using Samsara.ETL.Pipelines.SensorTemperature;
 using Samsara.ETL.Pipelines.SensorHistory;
 using Samsara.ETL.Pipelines.Trailer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -16,12 +15,16 @@ builder.AddSamsaraClient();
 builder.Services.AddServices();
 builder.Services.AddRepositories();
 
+
+
 var host = builder.Build();
 
 var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
 var ct = lifetime.ApplicationStopping;
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
+
+await host.StartAsync(); // Start the host
 
 try
 {
@@ -42,12 +45,16 @@ try
 
     // Run dependent jobs after parents run
     await Task.WhenAll(
-        job4.ExecuteAsync(ct)
-        //job5.ExecuteAsync(ct)
+        job4.ExecuteAsync(ct),
+        job5.ExecuteAsync(ct)
     );
 }
 catch (Exception ex)
 {
     logger.LogCritical(ex, "ETL pipeline failed");
-    Environment.ExitCode = 1;
+    Environment.ExitCode = 1; // Set exit code to indicate failure
+}
+finally
+{
+    await host.StopAsync(); // Ensure graceful shutdown
 }

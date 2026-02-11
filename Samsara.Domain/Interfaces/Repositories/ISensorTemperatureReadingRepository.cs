@@ -4,5 +4,5 @@ namespace Samsara.Domain.Interfaces.Repositories;
 
 public interface ISensorTemperatureReadingRepository
 {
-    Task InsertAsync(SensorTemperatureReading reading);
+    Task InsertBatchAsync(IEnumerable<SensorTemperatureReadingEntity> readings);
 }

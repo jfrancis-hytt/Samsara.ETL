@@ -1,6 +1,6 @@
 namespace Samsara.Domain.Entities;
 
-public class Trailer
+public class TrailerEntity
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

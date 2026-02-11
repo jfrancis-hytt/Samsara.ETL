@@ -41,31 +41,28 @@ public class GatewayService
             )).ToList()
         )).ToList();
 
-        foreach (var dto in gatewayDtos)
+        var entities = gatewayDtos.Select(dto => new GatewayEntity
         {
-            var gateway = new Gateway
-            {
-                Serial = dto.Serial,
-                Model = dto.Model,
-                AssetId = dto.AssetId ?? string.Empty,
-                SamsaraSerial = dto.SamsaraSerial ?? string.Empty,
-                SamsaraVin = dto.SamsaraVin,
-                HealthStatus = dto.HealthStatus ?? string.Empty,
-                LastConnected = dto.LastConnected,
-                CellularDataUsageBytes = dto.CellularDataUsageBytes ?? 0,
-                HotspotUsageBytes = dto.HotspotUsageBytes ?? 0
-            };
-            await _gatewayRepository.UpsertAsync(gateway);
+            Serial = dto.Serial,
+            Model = dto.Model,
+            AssetId = dto.AssetId ?? string.Empty,
+            SamsaraSerial = dto.SamsaraSerial ?? string.Empty,
+            SamsaraVin = dto.SamsaraVin,
+            HealthStatus = dto.HealthStatus ?? string.Empty,
+            LastConnected = dto.LastConnected,
+            CellularDataUsageBytes = dto.CellularDataUsageBytes ?? 0,
+            HotspotUsageBytes = dto.HotspotUsageBytes ?? 0
+        });
+        await _gatewayRepository.UpsertBatchAsync(entities);
 
-            var accessories = dto.AccessoryDevices?.Select(a => new AccessoryDevice
+        var allAccessories = gatewayDtos.SelectMany(dto =>
+            dto.AccessoryDevices?.Select(a => new AccessoryDeviceEntity
             {
                 Serial = a.Serial ?? string.Empty,
                 Model = a.Model ?? string.Empty,
                 GatewaySerial = dto.Serial
-            }) ?? [];
-            await _accessoryDeviceRepository.ReplaceByGatewayAsync(dto.Serial, accessories);
-        
-        }
+            }) ?? []);
+        await _accessoryDeviceRepository.ReplaceAllAsync(allAccessories);
 
         return gatewayDtos;
     }
