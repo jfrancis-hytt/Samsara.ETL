@@ -110,6 +110,23 @@ CREATE TABLE [dbo].[SensorTemperatureReadings]
 );
 
 -----------------------------------------------
+-- SensorHistoryReadings (child of Sensors)
+-----------------------------------------------
+CREATE TABLE [dbo].[SensorHistoryReadings]
+(
+    [Id]                    BIGINT          NOT NULL    IDENTITY(1, 1),
+    [SensorId]              BIGINT          NOT NULL,
+    [TimeMs]                BIGINT          NOT NULL,
+    [ProbeTemperature]      INT             NULL,
+    [AmbientTemperature]    INT             NULL,
+    [CreatedAt]             DATETIME2       NOT NULL    DEFAULT GETUTCDATE(),
+
+    CONSTRAINT [PK_SensorHistoryReadings] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_SensorHistoryReadings_Sensors] FOREIGN KEY ([SensorId])
+        REFERENCES [dbo].[Sensors] ([SensorId])
+);
+
+-----------------------------------------------
 -- Indexes
 -----------------------------------------------
 CREATE INDEX [IX_AccessoryDevices_GatewaySerial]
@@ -123,3 +140,9 @@ CREATE INDEX [IX_SensorTemperatureReadings_SensorId]
 
 CREATE INDEX [IX_SensorTemperatureReadings_CreatedAt]
     ON [dbo].[SensorTemperatureReadings] ([CreatedAt]);
+
+CREATE INDEX [IX_SensorHistoryReadings_SensorId]
+    ON [dbo].[SensorHistoryReadings] ([SensorId]);
+
+CREATE INDEX [IX_SensorHistoryReadings_TimeMs]
+    ON [dbo].[SensorHistoryReadings] ([TimeMs]);

@@ -15,6 +15,9 @@ public static class ClientExtensions
           .ValidateDataAnnotations()
           .ValidateOnStart();
 
+        builder.Services.AddOptions<SensorHistoryOptions>()
+          .Bind(builder.Configuration.GetSection("SensorHistory"));
+
         builder.Services.AddHttpClient<ISamsaraClient, SamsaraClient>((serviceProvider, httpClient) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<SamsaraOptions>>().Value;

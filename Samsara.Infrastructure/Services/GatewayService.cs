@@ -28,13 +28,13 @@ public class GatewayService
         var gatewayDtos = response.Data.Select(g => new GatewayDto(
             Serial: g.Serial,
             Model: g.Model,
-            AssetId: g.Asset.Id,
-            SamsaraSerial: g.Asset.ExternalIds.SamsaraSerial,
-            SamsaraVin: g.Asset.ExternalIds.SamsaraVin,
-            HealthStatus: g.ConnectionStatus.HealthStatus,
-            LastConnected: g.ConnectionStatus.LastConnected,
-            CellularDataUsageBytes: g.DataUsageLast30Days.CellularDataUsageBytes,
-            HotspotUsageBytes: g.DataUsageLast30Days.HotspotUsageBytes,
+            AssetId: g.Asset?.Id ?? string.Empty,
+            SamsaraSerial: g.Asset?.ExternalIds?.SamsaraSerial ?? string.Empty,
+            SamsaraVin: g.Asset?.ExternalIds?.SamsaraVin ?? null,
+            HealthStatus: g.ConnectionStatus?.HealthStatus ?? string.Empty,
+            LastConnected: g.ConnectionStatus?.LastConnected ?? null,
+            CellularDataUsageBytes: g.DataUsageLast30Days?.CellularDataUsageBytes ?? 0,
+            HotspotUsageBytes: g.DataUsageLast30Days?.HotspotUsageBytes ?? 0,
             AccessoryDevices: g.AccessoryDevices?.Select(a => new AccessoryDeviceDto(
                 Serial: a.Serial,
                 Model: a.Model
@@ -43,27 +43,28 @@ public class GatewayService
 
         foreach (var dto in gatewayDtos)
         {
-            var entity = new Gateway
+            var gateway = new Gateway
             {
                 Serial = dto.Serial,
                 Model = dto.Model,
-                AssetId = dto.AssetId,
-                SamsaraSerial = dto.SamsaraSerial,
+                AssetId = dto.AssetId ?? string.Empty,
+                SamsaraSerial = dto.SamsaraSerial ?? string.Empty,
                 SamsaraVin = dto.SamsaraVin,
-                HealthStatus = dto.HealthStatus,
+                HealthStatus = dto.HealthStatus ?? string.Empty,
                 LastConnected = dto.LastConnected,
-                CellularDataUsageBytes = dto.CellularDataUsageBytes,
-                HotspotUsageBytes = dto.HotspotUsageBytes
+                CellularDataUsageBytes = dto.CellularDataUsageBytes ?? 0,
+                HotspotUsageBytes = dto.HotspotUsageBytes ?? 0
             };
-            await _gatewayRepository.UpsertAsync(entity);
+            await _gatewayRepository.UpsertAsync(gateway);
 
             var accessories = dto.AccessoryDevices?.Select(a => new AccessoryDevice
             {
-                Serial = a.Serial,
-                Model = a.Model,
+                Serial = a.Serial ?? string.Empty,
+                Model = a.Model ?? string.Empty,
                 GatewaySerial = dto.Serial
             }) ?? [];
             await _accessoryDeviceRepository.ReplaceByGatewayAsync(dto.Serial, accessories);
+        
         }
 
         return gatewayDtos;

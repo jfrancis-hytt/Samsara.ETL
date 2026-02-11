@@ -2,6 +2,8 @@
 
 namespace Samsara.Infrastructure.Samsara.Responses;
 
+// Link: https://developers.samsara.com/reference/getgateways
+
 public record GatewayResponse(
     [property: JsonPropertyName("data")] IReadOnlyList<Gateway> Data,
     [property: JsonPropertyName("pagination")] PaginationInfo Pagination
@@ -17,28 +19,28 @@ public record Gateway(
 );
 
 public record AssetInfo(
-    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("id")] string? Id,
     [property: JsonPropertyName("externalIds")] ExternalIds ExternalIds
 );
 
 public record ExternalIds(
-    [property: JsonPropertyName("samsara.serial")] string SamsaraSerial,
+    [property: JsonPropertyName("samsara.serial")] string? SamsaraSerial,
     [property: JsonPropertyName("samsara.vin")] string? SamsaraVin
 );
 
 public record ConnectionStatus(
-    [property: JsonPropertyName("healthStatus")] string HealthStatus,
+    [property: JsonPropertyName("healthStatus")] string? HealthStatus,
     [property: JsonPropertyName("lastConnected")] DateTime? LastConnected
 );
 
 public record DataUsage(
-    [property: JsonPropertyName("cellularDataUsageBytes")] long CellularDataUsageBytes,
-    [property: JsonPropertyName("hotspotUsageBytes")] long HotspotUsageBytes
+    [property: JsonPropertyName("cellularDataUsageBytes")] long? CellularDataUsageBytes,
+    [property: JsonPropertyName("hotspotUsageBytes")] long? HotspotUsageBytes
 );
 
 public record AccessoryDevice(
-    [property: JsonPropertyName("serial")] string Serial,
-    [property: JsonPropertyName("model")] string Model
+    [property: JsonPropertyName("serial")] string? Serial,
+    [property: JsonPropertyName("model")] string? Model
 );
 
 public record PaginationInfo(

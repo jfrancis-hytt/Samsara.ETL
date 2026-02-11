@@ -23,8 +23,8 @@ public class SensorTemperatureService
         var response = await _samsaraClient.GetSensorTemperaturesAsync(sensorIds, ct);
 
         var temperatureDtos = response.Sensors.Select(s => new SensorTemperatureDto(
-            SensorId: s.Id,
-            Name: s.Name,
+            SensorId: s.Id ?? 0,
+            Name: s.Name ?? string.Empty,
             AmbientTemperature: s.AmbientTemperature,
             AmbientTemperatureTime: s.AmbientTemperatureTime,
             ProbeTemperature: s.ProbeTemperature,

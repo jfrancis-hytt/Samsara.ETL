@@ -20,20 +20,28 @@ public class GatewayJob
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
-        _logger.LogInformation("Starting Gateway sync");
-
-        var gateways = await _service.SyncGatewaysAsync(ct);
-
-        _logger.LogInformation("Synced {Count} Gateways:", gateways.Count);
-
-        foreach (var gateway in gateways)
+        try
         {
-            _logger.LogInformation(
-               "Gateway: {Serial} - {Model} - Health: {HealthStatus} - Asset: {AssetId}",
-               gateway.Serial,
-               gateway.Model,
-               gateway.HealthStatus,
-               gateway.AssetId);
+            _logger.LogInformation("Starting Gateway sync");
+
+            var gateways = await _service.SyncGatewaysAsync(ct);
+
+            _logger.LogInformation("Synced {Count} Gateways:", gateways.Count);
+
+            foreach (var gateway in gateways)
+            {
+                _logger.LogInformation(
+                   "Gateway: {Serial} - {Model} - Health: {HealthStatus} - Asset: {AssetId}",
+                   gateway.Serial,
+                   gateway.Model,
+                   gateway.HealthStatus,
+                   gateway.AssetId);
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Gateway job failed");
+        }
+        
     }
 }

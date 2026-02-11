@@ -14,5 +14,6 @@ public static class RepositoryExtensions
         services.AddScoped<ITrailerRepository, TrailerRepository>();
         services.AddScoped<ITrailerTagRepository, TrailerTagRepository>();
         services.AddScoped<ISensorTemperatureReadingRepository, SensorTemperatureReadingRepository>();
+        services.AddScoped<ISensorHistoryReadingRepository, SensorHistoryReadingRepository>();
     }
 }

@@ -27,18 +27,18 @@ public class TrailerService
 
         var trailerDtos = response.Data.Select(t => new TrailerDto(
             Id: t.Id,
-            Name: t.Name,
+            Name: t.Name ?? string.Empty,
             GatewaySerial: t.InstalledGateway?.Serial,
             GatewayModel: t.InstalledGateway?.Model,
             SamsaraSerial: t.ExternalIds?.SamsaraSerial,
             SamsaraVin: t.ExternalIds?.SamsaraVin,
             LicensePlate: t.LicensePlate,
             Notes: t.Notes,
-            EnabledForMobile: t.EnabledForMobile,
+            EnabledForMobile: t.EnabledForMobile ?? false,
             Tags: t.Tags?.Select(tag => new TrailerTagDto(
                 Id: tag.Id,
                 Name: tag.Name,
-                ParentTagId: tag.ParentTagId
+                ParentTagId: tag.ParentTagId ?? string.Empty
             )).ToList()
         )).ToList();
 

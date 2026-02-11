@@ -2,6 +2,7 @@
 using Samsara.ETL.Pipelines.Gateway;
 using Samsara.ETL.Pipelines.Sensor;
 using Samsara.ETL.Pipelines.SensorTemperature;
+using Samsara.ETL.Pipelines.SensorHistory;
 using Samsara.ETL.Pipelines.Trailer;
 using Samsara.Infrastructure.Services;
 
@@ -18,7 +19,7 @@ public static class ServiceExtensions
 
         // Sensor Temps
         services.AddScoped<SensorTemperatureService>();
-        services.AddScoped<SensorTemperatureSyncJob>();
+        services.AddScoped<SensorTemperatureJob>();
 
         // Gateways
         services.AddScoped<GatewayService>();
@@ -27,6 +28,10 @@ public static class ServiceExtensions
         // Trailers
         services.AddScoped<TrailerService>();
         services.AddScoped<TrailerJob>();
+
+        // Sensor History
+        services.AddScoped<SensorHistoryService>();
+        services.AddScoped<SensorHistoryJob>();
 
     }
 }

@@ -2,14 +2,16 @@
 
 namespace Samsara.Infrastructure.Samsara.Responses;
 
+// Link: https://developers.samsara.com/reference/v1getsensorstemperature
+
 public record SensorTemperatureResponse(
-    [property: JsonPropertyName("groupId")] long GroupId,
+    [property: JsonPropertyName("groupId")] long? GroupId,
     [property: JsonPropertyName("sensors")] IReadOnlyList<SensorTemperature> Sensors
 );
 
 public record SensorTemperature(
-    [property: JsonPropertyName("id")] long Id,
-    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("id")] long? Id,
+    [property: JsonPropertyName("name")] string? Name,
     [property: JsonPropertyName("ambientTemperature")] int? AmbientTemperature,
     [property: JsonPropertyName("ambientTemperatureTime")] DateTime? AmbientTemperatureTime,
     [property: JsonPropertyName("probeTemperature")] int? ProbeTemperature,

@@ -20,16 +20,25 @@ public class SensorJob
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
-        _logger.LogInformation("Starting sensor sync");
-
-        var sensors = await _sensorSyncService.SyncSensorsAsync(ct);
-
-        _logger.LogInformation("Synced {Count} sensors:", sensors.Count);
-
-        foreach (var sensor in sensors)
+        try
         {
-            _logger.LogInformation("Sensor: {Id} - {Name} - {Mac}",
-                sensor.SensorId, sensor.Name, sensor.MacAddress);
+            _logger.LogInformation("Starting sensor sync");
+
+            var sensors = await _sensorSyncService.SyncSensorsAsync(ct);
+
+            _logger.LogInformation("Synced {Count} sensors:", sensors.Count);
+
+            foreach (var sensor in sensors)
+            {
+                _logger.LogInformation("Sensor: {Id} - {Name} - {Mac}",
+                    sensor.SensorId, sensor.Name, sensor.MacAddress);
+            }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Sensor job failed");
+        }
+
+       
     }
 }

@@ -22,8 +22,8 @@ public class SensorService
 
         var sensorDtos = response.Sensors.Select(s => new SensorDto(
             SensorId: s.Id,
-            Name: s.Name,
-            MacAddress: s.MacAddress
+            Name: s.Name ?? string.Empty,
+            MacAddress: s.MacAddress ?? string.Empty
         )).ToList();
 
         foreach (var dto in sensorDtos)
