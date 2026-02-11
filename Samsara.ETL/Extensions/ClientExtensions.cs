@@ -30,7 +30,7 @@ public static class ClientExtensions
             var options = serviceProvider.GetRequiredService<IOptions<SamsaraOptions>>().Value;
             httpClient.BaseAddress = new Uri(options.BaseUrl);
             httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.ApiKey}");
-        });
+        }).AddStandardResilienceHandler(); // this is an extension method that adds Polly-based retry and circuit breaker policies
 
         return builder;
     }
