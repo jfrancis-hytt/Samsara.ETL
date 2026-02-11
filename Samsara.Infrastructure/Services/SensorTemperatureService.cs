@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 using Samsara.Infrastructure.Dtos;
@@ -8,18 +9,33 @@ namespace Samsara.Infrastructure.Services;
 public class SensorTemperatureService
 {
     private readonly ISamsaraClient _samsaraClient;
+    private readonly ISensorRepository _sensorRepository;
     private readonly ISensorTemperatureReadingRepository _sensorTemperatureReadingRepository;
+    private readonly ILogger<SensorTemperatureService> _logger;
 
     public SensorTemperatureService(
         ISamsaraClient samsaraClient,
-        ISensorTemperatureReadingRepository sensorTemperatureReadingRepository)
+        ISensorRepository sensorRepository,
+        ISensorTemperatureReadingRepository sensorTemperatureReadingRepository,
+        ILogger<SensorTemperatureService> logger)
     {
         _samsaraClient = samsaraClient;
+        _sensorRepository = sensorRepository;
         _sensorTemperatureReadingRepository = sensorTemperatureReadingRepository;
+        _logger = logger;
     }
 
-    public async Task<List<SensorTemperatureDto>> SyncSensorTemperaturesAsync(List<long> sensorIds, CancellationToken ct = default)
+    public async Task<List<SensorTemperatureDto>> SyncSensorTemperaturesAsync(CancellationToken ct = default)
     {
+        var sensors = await _sensorRepository.GetAllAsync();
+        var sensorIds = sensors.Select(s => s.SensorId).ToList();
+
+        if (sensorIds.Count == 0)
+        {
+            _logger.LogWarning("No sensors found in database — skipping temperature sync");
+            return [];
+        }
+
         var response = await _samsaraClient.GetSensorTemperaturesAsync(sensorIds, ct);
 
         var temperatureDtos = response.Sensors.Select(s => new SensorTemperatureDto(

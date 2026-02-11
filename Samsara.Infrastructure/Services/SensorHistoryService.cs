@@ -1,7 +1,10 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Samsara.Domain.Entities;
 using Samsara.Domain.Interfaces.Repositories;
 using Samsara.Infrastructure.Dtos;
 using Samsara.Infrastructure.Samsara.Client;
+using Samsara.Infrastructure.Samsara.Options;
 using Samsara.Infrastructure.Samsara.Requests;
 
 namespace Samsara.Infrastructure.Services;
@@ -9,25 +12,42 @@ namespace Samsara.Infrastructure.Services;
 public class SensorHistoryService
 {
     private readonly ISamsaraClient _samsaraClient;
+    private readonly ISensorRepository _sensorRepository;
     private readonly ISensorHistoryReadingRepository _sensorHistoryReadingRepository;
+    private readonly SensorHistoryOptions _options;
+    private readonly ILogger<SensorHistoryService> _logger;
 
     public SensorHistoryService(
         ISamsaraClient samsaraClient,
-        ISensorHistoryReadingRepository sensorHistoryReadingRepository)
+        ISensorRepository sensorRepository,
+        ISensorHistoryReadingRepository sensorHistoryReadingRepository,
+        IOptions<SensorHistoryOptions> options,
+        ILogger<SensorHistoryService> logger)
     {
         _samsaraClient = samsaraClient;
+        _sensorRepository = sensorRepository;
         _sensorHistoryReadingRepository = sensorHistoryReadingRepository;
+        _options = options.Value;
+        _logger = logger;
     }
 
     private const int MaxConcurrency = 5;
 
-    public async Task<List<SensorHistoryDto>> SyncSensorHistoryAsync(
-        List<long> sensorIds,
-        long startMs,
-        long endMs,
-        long stepMs,
-        CancellationToken ct = default)
+    public async Task<List<SensorHistoryDto>> SyncSensorHistoryAsync(CancellationToken ct = default)
     {
+        var sensors = await _sensorRepository.GetAllAsync();
+        var sensorIds = sensors.Select(s => s.SensorId).ToList();
+
+        if (sensorIds.Count == 0)
+        {
+            _logger.LogWarning("No sensors found in database — skipping history sync");
+            return [];
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var endMs = now.ToUnixTimeMilliseconds();
+        var startMs = now.AddHours(-_options.LookbackHours).ToUnixTimeMilliseconds();
+
         // Fetch sensors in parallel
         using var semaphore = new SemaphoreSlim(MaxConcurrency);
         var tasks = sensorIds.Select(async sensorId =>
@@ -35,7 +55,7 @@ public class SensorHistoryService
             await semaphore.WaitAsync(ct);
             try
             {
-                return await FetchSensorHistoryAsync(sensorId, startMs, endMs, stepMs, ct);
+                return await FetchSensorHistoryAsync(sensorId, startMs, endMs, ct);
             }
             finally
             {
@@ -63,7 +83,6 @@ public class SensorHistoryService
         long sensorId,
         long startMs,
         long endMs,
-        long stepMs,
         CancellationToken ct)
     {
         var series = new List<SensorHistorySeries>
@@ -75,7 +94,7 @@ public class SensorHistoryService
         var request = new SensorHistoryRequest(
             FillMissing: "withNull",
             Series: series,
-            StepMs: stepMs,
+            StepMs: _options.StepMs,
             StartMs: startMs,
             EndMs: endMs
         );
