@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Logging;
+using Quartz;
 using Samsara.Infrastructure.Services;
 
 namespace Samsara.ETL.Pipelines.SensorTemperature;
 
-public class SensorTemperatureJob
+public class SensorTemperatureJob : IJob
 {
     private readonly SensorTemperatureService _service;
     private readonly ILogger<SensorTemperatureJob> _logger;
@@ -16,8 +17,9 @@ public class SensorTemperatureJob
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(CancellationToken ct = default)
+    public async Task Execute(IJobExecutionContext context)
     {
+        var ct = context.CancellationToken;
         try
         {
             _logger.LogInformation("Starting sensor temperature sync");

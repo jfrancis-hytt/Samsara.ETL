@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-
-using Samsara.Infrastructure.Dtos;
+using Microsoft.Extensions.Logging;
+using Quartz;
 using Samsara.Infrastructure.Services;
 
 namespace Samsara.ETL.Pipelines.Gateway;
 
-public class GatewayJob
+public class GatewayJob : IJob
 {
     private readonly GatewayService _service;
     private readonly ILogger<GatewayJob> _logger;
@@ -18,15 +17,16 @@ public class GatewayJob
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(CancellationToken ct = default)
+    public async Task Execute(IJobExecutionContext context)
     {
+        var ct = context.CancellationToken;
         try
         {
-            _logger.LogInformation("Starting Gateway sync");
+            _logger.LogInformation("Starting gateway sync");
 
             var gateways = await _service.SyncGatewaysAsync(ct);
 
-            _logger.LogInformation("Synced {Count} Gateways:", gateways.Count);
+            _logger.LogInformation("Synced {Count} gateways", gateways.Count);
 
             foreach (var gateway in gateways)
             {
@@ -43,6 +43,5 @@ public class GatewayJob
             _logger.LogError(ex, "Gateway job failed");
             throw;
         }
-        
     }
 }

@@ -1,11 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-
-using Samsara.Infrastructure.Dtos;
+using Microsoft.Extensions.Logging;
+using Quartz;
 using Samsara.Infrastructure.Services;
 
 namespace Samsara.ETL.Pipelines.Sensor;
 
-public class SensorJob
+public class SensorJob : IJob
 {
     private readonly SensorService _sensorSyncService;
     private readonly ILogger<SensorJob> _logger;
@@ -18,15 +17,16 @@ public class SensorJob
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(CancellationToken ct = default)
+    public async Task Execute(IJobExecutionContext context)
     {
+        var ct = context.CancellationToken;
         try
         {
             _logger.LogInformation("Starting sensor sync");
 
             var sensors = await _sensorSyncService.SyncSensorsAsync(ct);
 
-            _logger.LogInformation("Synced {Count} sensors:", sensors.Count);
+            _logger.LogInformation("Synced {Count} sensors", sensors.Count);
 
             foreach (var sensor in sensors)
             {
@@ -39,7 +39,5 @@ public class SensorJob
             _logger.LogError(ex, "Sensor job failed");
             throw;
         }
-
-       
     }
 }

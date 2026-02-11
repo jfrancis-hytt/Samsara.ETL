@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+using Quartz;
 using Samsara.Infrastructure.Services;
 
 namespace Samsara.ETL.Pipelines.Trailer;
 
-public class TrailerJob
+public class TrailerJob : IJob
 {
     private readonly TrailerService _service;
     private readonly ILogger<TrailerJob> _logger;
@@ -16,8 +17,9 @@ public class TrailerJob
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(CancellationToken ct = default)
+    public async Task Execute(IJobExecutionContext context)
     {
+        var ct = context.CancellationToken;
         try
         {
             _logger.LogInformation("Starting trailer sync");
@@ -41,8 +43,5 @@ public class TrailerJob
             _logger.LogError(ex, "Trailer job failed");
             throw;
         }
-
-
-        
     }
 }
