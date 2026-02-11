@@ -39,6 +39,7 @@ public class TrailerJob
         catch (Exception ex)
         {
             _logger.LogError(ex, "Trailer job failed");
+            throw;
         }
 
 

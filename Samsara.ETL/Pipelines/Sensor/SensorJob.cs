@@ -37,6 +37,7 @@ public class SensorJob
         catch (Exception ex)
         {
             _logger.LogError(ex, "Sensor job failed");
+            throw;
         }
 
        

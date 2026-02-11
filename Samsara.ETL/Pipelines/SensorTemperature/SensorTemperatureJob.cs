@@ -41,9 +41,10 @@ public class SensorTemperatureJob
                     temp.SensorId, temp.Name, temp.AmbientTemperature, temp.ProbeTemperature);
             }
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             _logger.LogError(ex, "SensorTemperature job failed");
+            throw;
         }
         
     }

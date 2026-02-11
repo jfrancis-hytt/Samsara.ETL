@@ -41,6 +41,7 @@ public class GatewayJob
         catch (Exception ex)
         {
             _logger.LogError(ex, "Gateway job failed");
+            throw;
         }
         
     }

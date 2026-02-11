@@ -21,10 +21,22 @@ public sealed class SamsaraClient : ISamsaraClient
     /// <returns></returns>
     public async Task<SensorResponse> GetSensorsAsync(CancellationToken ct = default)
     {
-        var response = await _httpClient.GetFromJsonAsync<SensorResponse>(
-            "/v1/sensors/list", ct);
+        //var response = await _httpClient.GetFromJsonAsync<SensorResponse>(
+        //    "/v1/sensors/list", ct);
 
-        return response ?? new SensorResponse([]);
+        //return response ?? new SensorResponse([]);
+
+        var response = await _httpClient.GetAsync("/v1/sensors/list",ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"Sensors request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<SensorResponse>(ct);
+        return result ?? new SensorResponse([]);
     }
 
 
@@ -42,14 +54,23 @@ public sealed class SamsaraClient : ISamsaraClient
         do
         {
             var url = hasMorePages is null ? "/gateways" : $"/gateways?after={hasMorePages}";
-            var response = await _httpClient.GetFromJsonAsync<GatewayResponse>(url, ct);
+            var response = await _httpClient.GetAsync(url,ct);
 
-            if (response is null) // Break out because there are no more pages
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(ct);
+                throw new HttpRequestException(
+                    $"Gateways request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<GatewayResponse>(ct);
+
+            if (result is null) // Break out because there are no more pages
                 break;
 
-            allGatewayData.AddRange(response.Data); // Add every gateway object
+            allGatewayData.AddRange(result.Data); // Add every gateway object
 
-            hasMorePages = response.Pagination.HasNextPage ? response.Pagination.EndCursor : null; // Check if there are more pages and assign for next request. 
+            hasMorePages = result.Pagination.HasNextPage ? result.Pagination.EndCursor : null; // Check if there are more pages and assign for next request. 
 
         } while (hasMorePages != null);
 
@@ -65,12 +86,24 @@ public sealed class SamsaraClient : ISamsaraClient
     /// <returns><see cref="TrailerResponse"/></returns>
     public async Task<TrailerResponse> GetTrailersAsync(CancellationToken ct = default)
     {
-        var response = await _httpClient.GetFromJsonAsync<TrailerResponse>(
-            "/fleet/trailers", ct);
-        return response ?? new TrailerResponse(
+        //var response = await _httpClient.GetFromJsonAsync<TrailerResponse>(
+        //    "/fleet/trailers", ct);
+
+        var response = await _httpClient.GetAsync("/fleet/trailers", ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"Trailers request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
+        }
+
+        var result = await response.Content.ReadFromJsonAsync<TrailerResponse>(ct);
+        return result ?? new TrailerResponse(
             [],
             new PaginationInfo(string.Empty, false)
         );
+
     }
 
     /// <summary>
@@ -84,7 +117,14 @@ public sealed class SamsaraClient : ISamsaraClient
     {
         var request = new SensorTemperatureRequest(sensorIds);
         var response = await _httpClient.PostAsJsonAsync("/v1/sensors/temperature", request, ct);
-        response.EnsureSuccessStatusCode();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"Sensor temperature request failed with {(int)response.StatusCode} {response.StatusCode}: {errorBody}");
+        }
+
         var result = await response.Content.ReadFromJsonAsync<SensorTemperatureResponse>(ct);
         return result ?? new SensorTemperatureResponse(0, []);
     }

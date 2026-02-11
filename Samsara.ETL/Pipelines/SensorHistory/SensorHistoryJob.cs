@@ -48,6 +48,7 @@ public class SensorHistoryJob
         catch (Exception ex)
         {
             _logger.LogError(ex, "SensorHistory job failed");
+            throw;
         }
     }
 }
